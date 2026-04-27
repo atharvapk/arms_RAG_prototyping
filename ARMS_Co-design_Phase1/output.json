@@ -1,0 +1,20 @@
+{
+    "original_prompt": "Give me the record for a fit_category = 'Loose Running' and basic_size = 1.6 in the engineering_fits table.",
+    "final_result": [
+        {
+            "id": 11,
+            "standard": "ANSI",
+            "fit_type": "Clearance",
+            "basic_size": 1.6,
+            "fit_category": "Loose Running",
+            "hole_class": "C11",
+            "shaft_class": "h11",
+            "hole_max": 1.72,
+            "shaft_max": 1.6,
+            "fit_max": 0.18,
+            "hole_min": 1.66,
+            "shaft_min": 1.54,
+            "fit_min": 0.06
+        }
+    ]
+}
