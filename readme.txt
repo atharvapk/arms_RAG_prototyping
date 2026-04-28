@@ -11,3 +11,6 @@ pip install flask
 check:
 which python
 which pip
+
+change wd:
+cd ARMS_Co-design_Phase1
