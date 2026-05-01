@@ -5,7 +5,7 @@ from vanna.core.tool import Tool, ToolContext, ToolResult
 from pydantic import BaseModel, Field
 
 class InferenceArgs(BaseModel):
-    sql_query: str = Field(..., description="The raw, valid SQLite SELECT query you want to execute.")
+    sql_query: str = Field(..., description="The raw, valid SQLite SELECT query you want to execute. CRITICAL RULE: For text columns like fit_category, always use the LIKE operator with wildcards (e.g., fit_category LIKE '%Loose%') instead of exact '=' matches to account for user shorthand.")
 
 class CoDesignInferenceTool(Tool[InferenceArgs]):
     def __init__(self, db_path: str):
@@ -32,6 +32,7 @@ class CoDesignInferenceTool(Tool[InferenceArgs]):
         return InferenceArgs
     
     async def execute(self, context: ToolContext, args: InferenceArgs) -> ToolResult:
+        print(f"\n[INSPECTION LOG] The AI wrote this exact SQL: {args.sql_query}\n")
         try:
             conn = sqlite3.connect(self.db_path)
             df = pd.read_sql_query(args.sql_query, conn)
