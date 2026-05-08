@@ -11,6 +11,8 @@ from vanna.core.user import UserResolver, User, RequestContext
 
 from custom_tools import CoDesignInferenceTool
 
+#DONT USE THIS, THIS IS FOR TESTING ONLY 
+
 llm = OllamaLlmService(
     model = "llama3.1",
     host = "http://localhost:11434"
@@ -46,7 +48,6 @@ agent = Agent(
 async def train_golden_queries():
     print("Training Agent Memory with Golden Queries...")
     
-    # 1. Create your specific engineering examples
     training_examples = [
         ToolMemory(
             question="I have a cylinder of diameter 1 and I want it to fit loosely running",
@@ -73,10 +74,8 @@ async def train_golden_queries():
         )
     ]
     
-    # 2. Define the user context (Required by Vanna 2.x security)
     your_user = User(id="admin", email="admin@example.com", group_memberships=["admin"])
     
-    # 3. Save them permanently to ChromaDB
     for example in training_examples:
         await agent.agent_memory.save_tool_usage(
             question=example.question,
@@ -87,5 +86,4 @@ async def train_golden_queries():
         )
     print("Training complete! ChromaDB now remembers these examples.")
 
-# Run the training script
 asyncio.run(train_golden_queries())
