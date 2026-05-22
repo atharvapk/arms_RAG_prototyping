@@ -1,0 +1,9 @@
+# Python ignores
+.venv/
+__pycache__/
+
+# Visual Studio / C# ignores
+.vs/
+bin/
+obj/
+*.user
