@@ -78,6 +78,7 @@ namespace SolidWorksCircle
                 {
                     temp = (IDimXpertAnnotation)dimArray[i];
                     Console.WriteLine(temp.Name);
+                    Console.WriteLine($"BASIC_SIZE:{temp.Name}");
                 }
                 finally
                 {
