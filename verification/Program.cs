@@ -20,31 +20,45 @@ namespace SolidWorksCircle
         {
             swApp = Singleton.getApplication();
         }
+
         static void Main(string[] args)
         {
             var program = new Program();
             program.CastObjects();
-            program.FindTolerances();
 
-            string command = args[0].ToLower();
-            if (command == "colorcheck")
+            program.FindTolerances();
+            program.ListAllFaceNames();
+
+            if (args.Length > 0)
             {
-                string faceName = args[1];
-                program.ExtractColorFromNamedFace(faceName);
+                string command = args[0].ToLower();
+
+                if (command == "colorcheck" && args.Length > 1)
+                {
+                    string faceName = args[1];
+                    program.ExtractColorFromNamedFace(faceName);
+                }
+            }
+            else
+            {
+                Console.WriteLine("\n[Notice] Run from Visual Studio: No AI arguments provided. Skipping color check.");
             }
 
             program.CleanUp();
         }
+
         public void CastObjects()
         {
             swModel = swApp.IActiveDoc2;
             swExt = swModel.Extension;
-            swSelMgr = swModel.SelectionManager as SelectionMgr;
+            swSelMgr = (SelectionMgr)swModel.ISelectionManager;
             swPart = swModel as PartDoc;
-            dimXpertMgr = swApp.IActiveDoc2.Extension.get_DimXpertManager(swApp.IActiveDoc2.IGetActiveConfiguration().Name, true);
-            dimXpertPart = (DimXpertPart)dimXpertMgr.DimXpertPart;
 
+            dimXpertMgr = swApp.IActiveDoc2.Extension.get_DimXpertManager(swApp.IActiveDoc2.IGetActiveConfiguration().Name, true);
+
+            dimXpertPart = (DimXpertPart)dimXpertMgr.DimXpertPart;
         }
+
         public void FindTolerances()
         {
             int dimCount = dimXpertPart.GetAnnotationCount();
@@ -53,7 +67,7 @@ namespace SolidWorksCircle
 
             if (dimArray == null)
             {
-                Console.WriteLine("Damn");
+                Console.WriteLine("No tolerances found.");
                 return;
             }
 
@@ -67,7 +81,6 @@ namespace SolidWorksCircle
                 }
                 finally
                 {
-
                     if (temp != null)
                     {
                         Marshal.ReleaseComObject(temp);
@@ -75,51 +88,100 @@ namespace SolidWorksCircle
                 }
             }
         }
-        public void ExtractColorFromNamedFace(string faceName)
+
+        public void ExtractColorFromNamedFace(string targetFaceName)
         {
-            Console.WriteLine($"--- Checking Color for Face: {faceName} ---");
+            Console.WriteLine($"\n--- Searching for: {targetFaceName} ---");
+            bool found = false;
 
-            // 1. Clear any existing selections so we don't grab the wrong thing
-            swModel.ClearSelection2(true);
+            Array bodies = swPart.GetBodies2((int)swBodyType_e.swSolidBody, true) as Array;
+            if (bodies == null) return;
 
-            // 2. Tell SolidWorks to select the face by its name
-            bool status = swExt.SelectByID2(faceName, "FACE", 0, 0, 0, false, 0, null, 0);
-
-            if (status)
+            foreach (object bodyObj in bodies)
             {
-                // 3. Grab the actual Face object from our active selection
-                // The '1' means get the first thing selected.
-                Face2 selectedFace = (Face2)swSelMgr.GetSelectedObject6(1, -1);
+                Body2 myBody = (Body2)bodyObj;
+                Array faces = myBody.GetFaces() as Array;
+                if (faces == null) continue;
 
-                // 4. Extract the color data
-                double[] matProps = (double[])selectedFace.MaterialPropertyValues;
-
-                if (matProps != null)
+                foreach (object faceObj in faces)
                 {
-                    int red = (int)(matProps[0] * 255);
-                    int green = (int)(matProps[1] * 255);
-                    int blue = (int)(matProps[2] * 255);
+                    Face2 myFace = (Face2)faceObj;
+                    Entity myEntity = (Entity)myFace;
+                    string name = swPart.GetEntityName(myEntity);
 
-                    Console.WriteLine($"Found {faceName}! Color - R:{red} G:{green} B:{blue}");
+                    if (name == targetFaceName)
+                    {
+                        found = true;
+                        double[] matProps = (double[])myFace.MaterialPropertyValues;
+
+                        if (matProps != null)
+                        {
+                            int red = (int)(matProps[0] * 255);
+                            int green = (int)(matProps[1] * 255);
+                            int blue = (int)(matProps[2] * 255);
+                            Console.WriteLine($"TARGET_FACE:{targetFaceName}");
+                            Console.WriteLine($"COLOR_DATA:{red},{green},{blue}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Found {targetFaceName}, but it has no custom color applied.");
+                        }
+                        break; // Exit face loop
+                    }
                 }
-                else
-                {
-                    Console.WriteLine($"Found {faceName}, but it has no custom face color applied.");
-                }
+                if (found) break; // Exit body loop
             }
-            else
+
+            if (!found)
             {
-                Console.WriteLine($"Error: Could not find a face named '{faceName}'. Check your spelling or MBD tree.");
+                Console.WriteLine($"Error: Could not match any face to '{targetFaceName}'.");
             }
         }
+
+        public void ListAllFaceNames()
+        {
+            Console.WriteLine("\n--- Discovering all available face names ---");
+
+            Array bodies = swPart.GetBodies2((int)swBodyType_e.swSolidBody, true) as Array;
+
+            if (bodies == null)
+            {
+                Console.WriteLine("No bodies found.");
+                return;
+            }
+
+            foreach (object bodyObj in bodies)
+            {
+                Body2 myBody = (Body2)bodyObj;
+                Array faces = myBody.GetFaces() as Array;
+
+                if (faces == null) continue;
+
+                foreach (object faceObj in faces)
+                {
+                    Face2 myFace = (Face2)faceObj;
+
+                    Entity myEntity = (Entity)myFace;
+                    string name = swPart.GetEntityName(myEntity);
+
+                    if (string.IsNullOrEmpty(name))
+                    {
+                        name = "No Custom Name";
+                    }
+
+                    Console.WriteLine($"Face found: '{name}'");
+                }
+            }
+        }
+
         public void CleanUp()
         {
-            Marshal.ReleaseComObject(dimXpertPart);
-            Marshal.ReleaseComObject(dimXpertMgr);
-            Marshal.ReleaseComObject(swPart);
-            Marshal.ReleaseComObject(swSelMgr);
-            Marshal.ReleaseComObject(swExt);
-            Marshal.ReleaseComObject(swModel);
+            if (dimXpertPart != null) Marshal.ReleaseComObject(dimXpertPart);
+            if (dimXpertMgr != null) Marshal.ReleaseComObject(dimXpertMgr);
+            if (swPart != null) Marshal.ReleaseComObject(swPart);
+            if (swSelMgr != null) Marshal.ReleaseComObject(swSelMgr);
+            if (swExt != null) Marshal.ReleaseComObject(swExt);
+            if (swModel != null) Marshal.ReleaseComObject(swModel);
             Singleton.Dispose();
         }
     }
