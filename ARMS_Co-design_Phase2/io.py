@@ -115,12 +115,12 @@ async def train_database():
 
 async def run_JSONpipeline():
     try:
-        with open('input.json', 'r') as file:
+        with open('color_output.json', 'r') as file:
             input_data = json.load(file)
             raw_prompt = input_data.get("prompt")
             user_prompt = f"You are an expert mechanical engineering database and co-design assistant. A user is asking: '{raw_prompt}'. For now, query the database to find the exact tolerance records they need."
     except FileNotFoundError:
-        print("Could not find input.json")
+        print("Could not find color_output.json")
         return
 
     print(f"Asking Agent: {user_prompt}")

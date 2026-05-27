@@ -1,1 +1,1 @@
-{"target_face": "cylindrical_face", "hex": "ffc0c0", "basic_size": "Diameter1@Boss1(1.6)", "fit_category": "Locational Clearance"}
+{"target_face": "cylindrical_face", "hex": "ffc0c0", "basic_size": "1.6", "fit_category": "Locational Clearance", "prompt": "The user is asking about a cylindrical face with a basic size of 1.6 inches. Based on the user's input, the fit category for this face is 'Locational Clearance'. Return all the relevant tolerance records for this fit category and basic size from the engineering fits database."}

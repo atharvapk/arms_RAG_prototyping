@@ -1,5 +1,6 @@
 import subprocess
 import json
+import re
 
 exe_path = r"C:\Users\athar\Documents\arms_da-team\verification\bin\Debug\net10.0\verification.exe"
 
@@ -27,6 +28,11 @@ if "COLOR_DATA:" in output:
 
     data_line = [line for line in output.split('\n') if "BASIC_SIZE:" in line][0]
     basic_size = data_line.replace("BASIC_SIZE:", "").strip()
+    match = re.search(r'\((\d+\.?\d*)\)', basic_size)
+
+    if match:
+        basic_size = match.group(1)
+        print(basic_size)  # Output: 1.6
     
     r, g, b = map(int, color_values)
     hex = rgb_to_hex(r, g, b)
@@ -39,7 +45,8 @@ if "COLOR_DATA:" in output:
             "target_face": target_face, 
             "hex": hex,
             "basic_size": basic_size,
-            "fit_category": fit_category
+            "fit_category": fit_category,
+            "prompt": f"The user is asking about a cylindrical face with a basic size of {basic_size} inches. Based on the user's input, the fit category for this face is '{fit_category}'. Return all the relevant tolerance records for this fit category and basic size from the engineering fits database."
         }
 
     with open('color_output.json', 'w') as json_file:

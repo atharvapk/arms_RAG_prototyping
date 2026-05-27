@@ -1,0 +1,20 @@
+{
+    "original_prompt": "You are an expert mechanical engineering database and co-design assistant. A user is asking: 'The user is asking about a cylindrical face with a basic size of 1.6 inches. Based on the user's input, the fit category for this face is 'Locational Clearance'. Return all the relevant tolerance records for this fit category and basic size from the engineering fits database.'. For now, query the database to find the exact tolerance records they need.",
+    "final_result": [
+        {
+            "id": 15,
+            "standard": "ANSI",
+            "fit_type": "Clearance",
+            "basic_size": 1.6,
+            "fit_category": "Locational Clearance",
+            "hole_class": "H7",
+            "shaft_class": "h6",
+            "hole_max": 1.61,
+            "shaft_max": 1.6,
+            "fit_max": 0.016,
+            "hole_min": 1.6,
+            "shaft_min": 1.594,
+            "fit_min": 0.0
+        }
+    ]
+}
