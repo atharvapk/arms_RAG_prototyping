@@ -22,6 +22,7 @@ Install ollama model: llama3.1
 
 Demo Videos:
 Color Extraction
+https://github.com/user-attachments/assets/45de032b-0560-47ac-bec0-49c37eaa17cf
 https://drive.google.com/file/d/1XXKl4vG1p2seIUcdOAXpDsX4TbkDxkWf/view?usp=drive_link
 
 MBD Dimensioning
